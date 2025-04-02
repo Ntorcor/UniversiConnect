@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import mysql.connector
 
-app = Flask(_name_)
-app.secret_key = "clave_secreta"  
+app = Flask(__name__)
+app.secret_key = "clave_secreta"  # Para manejar sesiones
 
+# Conectar a la base de datos
 conexion = mysql.connector.connect(
     host="localhost",
-    user="root",  
-    password="1234",  
+    user="root",  # Cambiar si es necesario
+    password="1234",  # Cambiar si es necesario
     database="PROYECTO"
 )
 cursor = conexion.cursor()
@@ -36,7 +37,7 @@ def login():
             pass_col = "CONTRASEÑA"
         else:
             mensaje = "Tipo de usuario no válido."
-            return render_template("login.html", mensaje=mensaje)
+            return render_template("index.html", mensaje=mensaje)
 
         # Verificar credenciales
         query = f"SELECT * FROM {tabla} WHERE {id_col} = %s AND {pass_col} = %s"
@@ -49,29 +50,21 @@ def login():
         else:
             mensaje = "ID o contraseña incorrectos."
 
-    return render_template("login.html", mensaje=mensaje)
+    return render_template("index.html", mensaje=mensaje)
 
+# Ruta del Dashboard (Página tras iniciar sesión)
 @app.route("/dashboard")
 def dashboard():
     if "usuario" in session:
         return render_template("dashboard.html", usuario=session["usuario"])
     else:
-        return redirect(url_for("login"))
+        return redirect(url_for("index"))
 
 # Ruta para cerrar sesión
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
-# Rutas para los botones adicionales
-@app.route("/pedir_tutoria")
-def pedir_tutoria():
-    return render_template("pedir_tutoria.html")  # Crear plantilla para pedir tutoría
-
-@app.route("/reservar_aula")
-def reservar_aula():
-    return render_template("reservar_aula.html")  # Crear plantilla para reservar aula
-
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run(debug=True)
