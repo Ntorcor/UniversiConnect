@@ -46,17 +46,17 @@ def login():
 
         if resultado:
             session["usuario"] = user_id
-            return redirect(url_for("dashboard"))  # Redirigir al dashboard
+            return redirect(url_for("index"))  # Redirigir al dashboard
         else:
             mensaje = "ID o contraseña incorrectos."
 
     return render_template("index.html", mensaje=mensaje)
 
 # Ruta del Dashboard (Página tras iniciar sesión)
-@app.route("/dashboard")
+@app.route("/index")
 def dashboard():
     if "usuario" in session:
-        return render_template("dashboard.html", usuario=session["usuario"])
+        return render_template("index.html", usuario=session["usuario"])
     else:
         return redirect(url_for("index"))
 
