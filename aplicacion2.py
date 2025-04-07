@@ -4,14 +4,25 @@ import mysql.connector
 app = Flask(__name__)
 app.secret_key = "clave_secreta"  # Para manejar sesiones
 
+import mysql.connector
+
 # Conectar a la base de datos
-conexion = mysql.connector.connect(
+connection = mysql.connector.connect(
     host="localhost",
-    user="root",  # Cambiar si es necesario
-    password="1234",  # Cambiar si es necesario
-    database="PROYECTO"
+    user="root",
+    password="1234",
+    database="PROYECTO",
+    port=3306
 )
-cursor = conexion.cursor()
+if connection.is_connected():
+    print("Conectado a la base de datos MySQL")
+
+import os
+SQLALCHEMY_DATABASE_URI = os.getenv('JAWSDB_URL')
+print("URL de conexión:", SQLALCHEMY_DATABASE_URI)
+
+
+cursor = connection.cursor()
 
 # Ruta principal (Login)
 @app.route("/", methods=["GET", "POST"])
@@ -37,7 +48,7 @@ def login():
             pass_col = "CONTRASEÑA"
         else:
             mensaje = "Tipo de usuario no válido."
-            return render_template("index.html", mensaje=mensaje)
+            return render_template("login.html", mensaje=mensaje)
 
         # Verificar credenciales
         query = f"SELECT * FROM {tabla} WHERE {id_col} = %s AND {pass_col} = %s"
@@ -46,25 +57,25 @@ def login():
 
         if resultado:
             session["usuario"] = user_id
-            return redirect(url_for("index"))  # Redirigir al dashboard
+            return redirect(url_for("dashboard"))  # Redirigir al dashboard
         else:
             mensaje = "ID o contraseña incorrectos."
 
-    return render_template("index.html", mensaje=mensaje)
+    return render_template("login.html", mensaje=mensaje)
 
 # Ruta del Dashboard (Página tras iniciar sesión)
-@app.route("/index")
-def dashboard():
+@app.route("/login")
+def login():
     if "usuario" in session:
-        return render_template("index.html", usuario=session["usuario"])
+        return render_template("login.html", usuario=session["usuario"])
     else:
-        return redirect(url_for("index"))
+        return redirect(url_for("login"))
 
 # Ruta para cerrar sesión
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
-    return redirect(url_for("index"))
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)
