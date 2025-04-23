@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 # Fetch variables
-USER = os.getenv("ntorcor")
+USER = os.getenv("Ntorcor")
 PASSWORD = os.getenv("UniversiConnect2025")
 HOST = os.getenv("UniversiConnect")
 PORT = os.getenv("5432")
