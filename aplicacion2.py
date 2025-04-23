@@ -1,28 +1,56 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import mysql.connector
+import psycopg2
+
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env
+load_dotenv()
+
+# Fetch variables
+USER = os.getenv("ntorcor")
+PASSWORD = os.getenv("UniversiConnect2025")
+HOST = os.getenv("UniversiConnect")
+PORT = os.getenv("5432")
+DBNAME = os.getenv("dbname")
+
+# Connect to the database
+try:
+    connection = psycopg2.connect(
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
+        port=PORT,
+        dbname=DBNAME
+    )
+    print("Connection successful!")
+    
+    # Create a cursor to execute SQL queries
+    cursor = connection.cursor()
+    
+    # Example query
+    cursor.execute("SELECT NOW();")
+    result = cursor.fetchone()
+    print("Current Time:", result)
+
+    # Close the cursor and connection
+    cursor.close()
+    connection.close()
+    print("Connection closed.")
+
+except Exception as e:
+    print(f"Failed to connect: {e}")
 
 app = Flask(__name__)
-app.secret_key = "clave_secreta"  # Para manejar sesiones
+app.secret_key = "clave_secreta"  
 
-import mysql.connector
-
-# Conectar a la base de datos
-connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="1234",
-    database="PROYECTO",
-    port=3306
-)
-if connection.is_connected():
-    print("Conectado a la base de datos MySQL")
-
-import os
-SQLALCHEMY_DATABASE_URI = os.getenv('JAWSDB_URL')
-print("URL de conexión:", SQLALCHEMY_DATABASE_URI)
-
-
-cursor = connection.cursor()
+#conexion = mysql.connector.connect(
+    #host="localhost",
+    #user="root",  
+    #password="1234",  
+    #database="PROYECTO"
+#)
+#cursor = conexion.cursor()
 
 # Ruta principal (Login)
 @app.route("/", methods=["GET", "POST"])
@@ -63,11 +91,10 @@ def login():
 
     return render_template("login.html", mensaje=mensaje)
 
-# Ruta del Dashboard (Página tras iniciar sesión)
-@app.route("/login")
-def login():
+@app.route("/dashboard")
+def dashboard():
     if "usuario" in session:
-        return render_template("login.html", usuario=session["usuario"])
+        return render_template("dashboard.html", usuario=session["usuario"])
     else:
         return redirect(url_for("login"))
 
@@ -77,5 +104,14 @@ def logout():
     session.pop("usuario", None)
     return redirect(url_for("login"))
 
-if __name__ == "__main__":
+# Rutas para los botones adicionales
+@app.route("/pedir_tutoria")
+def pedir_tutoria():
+    return render_template("pedir_tutoria.html")  # Crear plantilla para pedir tutoría
+
+@app.route("/reservar_aula")
+def reservar_aula():
+    return render_template("reservar_aula.html")  # Crear plantilla para reservar aula
+
+if __name__ == "_main_":
     app.run(debug=True)
